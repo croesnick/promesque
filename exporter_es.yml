@@ -1,0 +1,9 @@
+---
+metrics:
+  es_addres_at_mill_lane:
+    metric_desc: amount of addreses with mill OR lane
+    metric_labels:
+       max_score: hits.max_score
+    metric_value: hits.total
+    es_url: http://localhost:9200/bank/_search
+    es_query: '{ "query": { "match": {"address": "mill lane"} }, "_source": ["address"] }'
