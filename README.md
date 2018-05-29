@@ -5,11 +5,15 @@ This exporter intented to expose metrics based on Elasticsearch queries. This ex
 ## Requirements
 
 Any modern Linux distro (Arch, Ubuntu, CentOS, Debian).
+
 Following `python2.7` libraries are required: `pyyaml, requests, prometheus_client`
 
 ## Configuration File
 
-Configuration file is in a yaml format with single configuration scope (`metrics`). Each item in `metrics` scope define a metric and must have following attributes:
+Configuration file is in a yaml format with single configuration scope (`metrics`). 
+
+Each item in `metrics` scope define a metric and must have following attributes:
+    
     - metric_desc - description of a metric (what it does)
     - metric_value - reference to value in Elasticsearch response (json data)
     - metric_labels - inner scope with `metric_name: reference` for each metric:
