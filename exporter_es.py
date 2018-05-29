@@ -65,7 +65,7 @@ class ESGaugeMetric(object):
             elems.append(bracket)
         return ''.join(elems)
 
-    def es_query(self, url, data=None):
+    def es_query(self, url, data):
         '''
         query Elasticsearch cluster and return raw requests.Response object
         url     -- url to elastic search e.g. - http://localhost:9200/bank/_search
@@ -73,10 +73,7 @@ class ESGaugeMetric(object):
         return  -- raw requests.Response object
         '''
         headers = {'Content-Type': 'application/json'}
-        if data:
-            resp = requests.post(url, headers=headers, data=data)
-        else:
-            resp = requests.get(url, headers=headers)
+        resp = requests.post(url, headers=headers, data=data)
         return resp
 
     def populate(self, metric_data):
@@ -173,5 +170,8 @@ if __name__ == '__main__':
     start_http_server(opts.port)
     while True:
         for metric in metrics:
-            metric.update(print_metric=True)
+            try:
+                metric.update(print_metric=True)
+            except Exception as ex:
+                logger.error(ex)
         time.sleep(opts.interval)
