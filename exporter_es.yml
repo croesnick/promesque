@@ -8,7 +8,7 @@ metrics:
     es_url: http://localhost:9200/bank/_search
     es_query: '{ "query": { "match": {"address": "mill lane"} }, "_source": ["address"] }'
   es_system_log_messages_hourly:
-    metric_desc: amount of messages in /var/log/* for a last hour
+    metric_desc: amount of messages matching 'ALPM' in /var/log/* for a last hour
     metric_value: aggregations.count.value
     es_url: http://localhost:9200/filebeat-6.2.4-2018.05.30/_search
     es_query: '{ "query": { "bool": { "must": { "match": { "message": "ALPM" } }, "filter": { "range": { "@timestamp": { "gte": "now-1h" } } } } }, "size": 0, "aggs": { "count": { "value_count": { "field": "@timestamp" } } } }'
