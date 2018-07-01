@@ -90,7 +90,7 @@ class ESGaugeMetric(object):
         value_var = 'metric_data{0}'.format(value_path)
         metric_value = converter(eval(value_var))
         metric_labels = {}
-        for label_name, label_path in self.labels.iteritems():
+        for label_name, label_path in self.labels.items():
             label_path = self.path_converter(label_path)
             label_var = 'metric_data{0}'.format(label_path)
             metric_labels[label_name] = eval(label_var)
@@ -104,7 +104,7 @@ class ESGaugeMetric(object):
         '''
         if metric_labels:
             label_value = []
-            for label, value in metric_labels.iteritems():
+            for label, value in metric_labels.items():
                 label_value.append('{l}={v}'.format(l=label, v=value))
             # show labels in a log
             text = '{n}{{{lv}}} {v}'.format(n=self.name, lv=', '.join(label_value), v=metric_value)
@@ -114,7 +114,7 @@ class ESGaugeMetric(object):
         if self.logger:
             self.logger.info(text)
         else:
-            print '[INFO]: {t}'.format(t=text)
+            print('[INFO]: {t}'.format(t=text))
         
     def update(self, print_metric=False):
         '''
@@ -149,20 +149,20 @@ if __name__ == '__main__':
         try:
             conf = yaml.load(f)
         except Exception as ex:
-            print '[ERROR]: failed to parse configuration file {0} ...'.format(opts.conf)
+            print('[ERROR]: failed to parse configuration file {0} ...'.format(opts.conf))
             sys.exit(1)
     # store all metrics in a list
     metrics = []
     # get metric params from config
     conf_metrics = conf['metrics']
-    for metric_name, metric_params in conf_metrics.iteritems():
+    for metric_name, metric_params in conf_metrics.items():
         metric_desc = metric_params['metric_desc']
         metric_value = metric_params['metric_value']
         es_url = metric_params['es_url']
         es_query = metric_params['es_query']
         # metric_labels is not required config param, hence need to create it's default
         metric_labels = {}
-        if metric_params.has_key('metric_labels'):
+        if 'metric_labels' in metric_params:
             metric_labels = metric_params['metric_labels']
         # create and store metric
         metric = ESGaugeMetric(metric_name, metric_desc, metric_labels, metric_value, int, es_url, es_query, logger=logger)
