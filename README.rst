@@ -1,15 +1,28 @@
-## About
+promesque
+=========
 
-This exporter intented to expose metrics based on Elasticsearch queries.
-This exporter never run in production, so use it on your own risk :-)
+*promesque* is a configurable Prometheus exporter for results of Elasticsearch queries.
 
-## Requirements
+Installation
+------------
 
-Any modern Linux distro (Arch, Ubuntu, CentOS, Debian).
+::
 
-Following `python` libraries are required: `pyyaml`, `requests`, `prometheus_client`.
+    pip install -e https://github.com/croesnick/promesque
 
-## Configuration File
+Usage
+-----
+
+::
+
+    promesque path/to/some/config.yml --log-level info
+
+Refer to `exporter_es.yml` as an example for such a config.
+The supported fields are explained below.
+
+
+Configuration File
+------------------
 
 Configuration file is in a yaml format with single configuration scope (`metrics`).
 
@@ -25,22 +38,11 @@ Each item in `metrics` scope define a metric and must have following attributes:
     - _either_ be inclosed in single quotes (e.g. `'{ "query": {...} }'`)
     - _or_ written in [YAML block notation](http://yaml.org/spec/1.2/spec.html#|%20literal%20style//) with proper indentation, e.g.,
 
-        ```
-        es_query: |
-          {
-            "query": {
-              ...
-            }
-          }
-        ```
+        ::
 
-Refer to `exporter_es.yml` as an example.
-
-## Installation and running
-
-```
-virtualenv .pyenv
-. .pyenv/bin/activate
-pip install pyyaml requests prometheus_client
-python exporter_es.py --conf exporter_es.yml --log-level INFO --log-file /tmp/exporter_es.log
-```
+            es_query: |
+              {
+                "query": {
+                  ...
+                }
+              }
