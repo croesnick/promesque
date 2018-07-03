@@ -1,16 +1,18 @@
 import json
-import requests
 
+import requests
+from jsonpath_ng import jsonpath, parse
 from prometheus_client import Gauge
 
 
 class ESGaugeMetric(object):
-    def __init__(self, name, desc, labels, value, value_converter, url, query, logger=None):
+    def __init__(self, name, description, labels, data_path, value_path, url, query, value_converter=None, logger=None):
         '''
-        name            -- metric name (e.g. node_network_status)
-        desc            -- metric description
+        name            -- name of metric (e.g., node_network_status)
+        description     -- description of metric
         labels          -- indexes (tuple of strings) in metric_data taken as labels
-        value           -- index in metric_data (dict) taken as value for metric
+        data_path       -- jsonpath to buckets of data to build metrics from
+        value_path      -- jsonpath to value of the metric, located inside data referred to by `data_path`
         value_converter -- sometime value may came in mixed format like - 5s, 3GB.
                            we need to convert this value to numeric.
                            pass a function reference to this converter, can be lambda as well.
@@ -18,28 +20,18 @@ class ESGaugeMetric(object):
         query           -- elasticsearch query data for POST request
         logger          -- instance of logging.Logger class
         '''
-        self.gauge = Gauge(name, desc, list(labels))
+        self.gauge = Gauge(name, description, list(labels))
         self.name = name
         self.labels = labels
-        self.value = value
+        self.data_path = data_path
+        self.value_path = value_path
         self.value_converter = value_converter
         self.url = url
         self.query = query
         self.logger = logger
 
-    def path_converter(self, path):
-        '''
-        convert path from indexA.indexB to ['indexA']['indexB']
-        path    -- path in dot notaion
-        return  -- path in bracket notaion
-        '''
-        elems = []
-        for elem in path.split('.'):
-            bracket = "['{0}']".format(elem)
-            elems.append(bracket)
-        return ''.join(elems)
-
-    def es_query(self, url, data):
+    @classmethod
+    def es_query(cls, url, data):
         '''
         query Elasticsearch cluster and return raw requests.Response object
         url     -- url to elastic search e.g. - http://localhost:9200/bank/_search
@@ -50,25 +42,42 @@ class ESGaugeMetric(object):
         resp = requests.post(url, headers=headers, data=data)
         return resp
 
-    def populate(self, metric_data):
+    def metrics(self, metric_data):
         '''
         populate labels and value with data
         metric_data -- dict object
-        return      -- metric_labels - dict with label=value, metric_value - converted value
+        return      -- labels - list of dicts with label=value, value
         '''
-        try:
-            converter = getattr(self, self.value_converter)
-        except Exception:
-            converter = self.value_converter
-        value_path = self.path_converter(self.value)
-        value_var = 'metric_data{0}'.format(value_path)
-        metric_value = converter(eval(value_var))
-        metric_labels = {}
-        for label_name, label_path in self.labels.items():
-            label_path = self.path_converter(label_path)
-            label_var = 'metric_data{0}'.format(label_path)
-            metric_labels[label_name] = eval(label_var)
-        return metric_labels, metric_value
+        value_jsonpath = parse(self.value_path)
+
+        data_jsonpath = parse(self.data_path)
+        data = [item.value for item in data_jsonpath.find(metric_data)]
+
+        for item in data:
+            value_matches = value_jsonpath.find(item)
+            if len(value_matches) != 1:
+                self.logger.error('Expected exactly one metric value at value path={0}, got {1}'.format(
+                    self.value_path,
+                    len(value_matches)))
+                raise ValueError
+
+            value = value_matches[0].value
+            if self.value_converter:
+                value = self.value_converter(value)
+
+            labels = {}
+            for name, path in self.labels.items():
+                label_jsonpath = parse(path)
+                label_matches = label_jsonpath.find(item)
+                if len(label_matches) != 1:
+                    self.logger.error('Expected exactly one label value at path={0}, got {1}'.format(
+                        path,
+                        len(label_matches)))
+                    raise ValueError
+
+                labels[name] = label_matches[0].value
+
+            yield labels, value
 
     def print_metric(self, metric_labels, metric_value):
         '''
@@ -96,11 +105,11 @@ class ESGaugeMetric(object):
         print_metric    -- print metric to stdout (good for dev stage)
         '''
         resp = self.es_query(self.url, data=self.query)
-        metric_data = json.loads(resp.text)
-        metric_labels, metric_value = self.populate(metric_data)
-        if print_metric:
-            self.print_metric(metric_labels, metric_value)
-        if self.labels:
-            self.gauge.labels(**metric_labels).set(metric_value)
-        else:
-            self.gauge.set(metric_value)
+        data = json.loads(resp.text)
+        for labels, value in self.metrics(data):
+            if print_metric:
+                self.print_metric(labels, value)
+            if self.labels:
+                self.gauge.labels(**labels).set(value)
+            else:
+                self.gauge.set(value)

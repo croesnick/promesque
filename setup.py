@@ -34,6 +34,7 @@ setup(
         'ruamel.yaml~=0.15',
         'prometheus_client~=0.2',
         'requests~=2.19',
+        'jsonpath-ng~=1.4',
     ],
     python_requires='~=3.6',
     packages=find_packages(exclude=['test']),

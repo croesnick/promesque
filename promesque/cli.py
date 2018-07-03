@@ -32,21 +32,21 @@ def cli(config, port, interval, log_file, log_level):
             logger.error('Failed to parse configuration file {0}. Errors: {1}'.format(config, e))
             sys.exit(1)
 
-    # store all metrics in a list
     metrics = []
-    # get metric params from config
+
     conf_metrics = config['metrics']
-    for metric_name, metric_params in conf_metrics.items():
-        metric_desc = metric_params['metric_desc']
-        metric_value = metric_params['metric_value']
-        es_url = metric_params['es_url']
-        es_query = metric_params['es_query']
-        # metric_labels is not required config param, hence need to create it's default
-        metric_labels = {}
-        if 'metric_labels' in metric_params:
-            metric_labels = metric_params['metric_labels']
-        # create and store metric
-        metric = ESGaugeMetric(metric_name, metric_desc, metric_labels, metric_value, int, es_url, es_query, logger=logger)
+    for name, properties in conf_metrics.items():
+        url = properties['url']
+        description = properties['description']
+        data_path = properties.get('data_path', '$')
+        value_path = properties['value_path']
+        query = properties['query']
+
+        labels = {}
+        if 'labels' in properties:
+            labels = properties['labels']
+
+        metric = ESGaugeMetric(name, description, labels, data_path, value_path, url, query, logger=logger)
         metrics.append(metric)
 
     start_http_server(port)
