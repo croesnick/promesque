@@ -88,7 +88,7 @@ class ESGaugeMetric(object):
         if metric_labels:
             label_value = []
             for label, value in metric_labels.items():
-                label_value.append('{l}={v}'.format(l=label, v=value))
+                label_value.append('{l}="{v}"'.format(l=label, v=value))
             # show labels in a log
             text = '{n}{{{lv}}} {v}'.format(n=self.name, lv=', '.join(label_value), v=metric_value)
         else:
