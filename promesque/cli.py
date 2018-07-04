@@ -14,7 +14,7 @@ logger = ExporterLogger('promesque')
 
 @click.command()
 @click.argument('config', type=click.Path(exists=True))
-@click.option('--port', default=9100, help='Port to bind prometheus exporter')
+@click.option('--port', default=9349, help='Port to bind prometheus exporter')
 @click.option('--interval', default=60, help='Interval to probe nodes and update metrics (in seconds)')
 @click.option('--log-file', type=click.Path(writable=True), help='Path to log file to write')
 @click.option('--log-level', type=click.Choice(LOG_LEVEL_MAP.keys()), default='error')
