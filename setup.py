@@ -20,12 +20,14 @@ setup(
     download_url='https://github.com/croesnick/promesque/archive/v{}.tar.gz'.format(version),
     license='MIT',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
+        'Topic :: System :: Monitoring',
         'Topic :: Utilities',
     ],
     install_requires=[
