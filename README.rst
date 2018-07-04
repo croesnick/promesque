@@ -8,7 +8,7 @@ Installation
 
 ::
 
-    pip install -e https://github.com/croesnick/promesque
+    pip3 install promesque
 
 Usage
 -----
