@@ -3,7 +3,7 @@
 
 from setuptools import find_packages, setup
 
-version = '0.0.2'
+version = '0.0.3'
 
 with open('README.rst', encoding='utf-8') as file:
     long_description = file.read()
@@ -26,6 +26,7 @@ setup(
         'Intended Audience :: System Administrators',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Topic :: System :: Monitoring',
         'Topic :: Utilities',
@@ -38,7 +39,11 @@ setup(
         'requests~=2.19',
         'jsonpath-ng~=1.4',
     ],
-    python_requires='~=3.6',
+    python_requires='>=3.5',
+    tests_require=[
+        'pytest~=3.4',
+        'pytest-mock~=1.7',
+    ],
     packages=find_packages(exclude=['test']),
     entry_points={
         'console_scripts': [
